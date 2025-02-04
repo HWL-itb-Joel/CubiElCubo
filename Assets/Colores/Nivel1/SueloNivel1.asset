@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2ab085d03e0f4cc28026c3b548a5a40, type: 3}
   m_Name: SueloNivel1
   m_EditorClassIdentifier: 
-  ColorBase: {r: 0, g: 0.6, b: 0, a: 0}
-  Daltonico: {r: 0.6431373, g: 0.4862745, b: 0.1254902, a: 0}
+  ColorBase: {r: 0, g: 0.6, b: 0, a: 1}
+  Daltonico: {r: 0.6431373, g: 0.4862745, b: 0.1254902, a: 1}

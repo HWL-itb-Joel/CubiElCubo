@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2ab085d03e0f4cc28026c3b548a5a40, type: 3}
   m_Name: PuertaNivel1
   m_EditorClassIdentifier: 
-  ColorBase: {r: 0.29803923, g: 1, b: 0.3019608, a: 0}
-  Daltonico: {r: 1, g: 0.84313726, b: 0.61960787, a: 0}
+  ColorBase: {r: 0.29803923, g: 1, b: 0.3019608, a: 1}
+  Daltonico: {r: 1, g: 0.84313726, b: 0.61960787, a: 1}

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: PlayerNivel1
   m_EditorClassIdentifier: 
   ColorBase: {r: 0.5176471, g: 0.14509805, b: 0.5764706, a: 1}
-  Daltonico: {r: 0.16078432, g: 0.3254902, b: 0.54509807, a: 0}
+  Daltonico: {r: 0.16078432, g: 0.3254902, b: 0.54509807, a: 1}
