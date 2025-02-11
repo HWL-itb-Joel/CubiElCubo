@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public bool conoCollected;
+
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
     public float jumpForce = 12f;
@@ -24,8 +26,11 @@ public class PlayerController : MonoBehaviour
     public float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
 
+
+
     private void Start()
     {
+        conoCollected = false;
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
     }
@@ -57,6 +62,11 @@ public class PlayerController : MonoBehaviour
         else
         {
             jumpBufferCounter -= Time.deltaTime;
+        }
+
+        if (conoCollected && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.M)))
+        {
+            GameManager.gameManager.ChangeColor();
         }
 
         // Movimiento horizontal
@@ -92,6 +102,15 @@ public class PlayerController : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Cono"))
+        {
+            conoCollected = true;
+            collision.gameObject.SetActive(false);
         }
     }
 }
