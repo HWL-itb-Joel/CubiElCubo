@@ -60,7 +60,7 @@ public class GameManager : MonoBehaviour
         if (sceneNumber == 0)
         {
             backgroundTransition.color = Color.black;
-            transitionText.color = Color.black;
+            transitionText.color = Color.clear;
             transitionText.text = "";
         }
         else if (sceneNumber == 1)
