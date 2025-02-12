@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
@@ -26,10 +28,16 @@ public class PlayerController : MonoBehaviour
     public float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
 
+    [Header("Dead")]
+    public bool isDead = false;
+    public float upwardForce = 5f;
+    public float fallSpeed = 5f;
+
 
 
     private void Start()
     {
+        isDead = false;
         conoCollected = false;
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -37,58 +45,68 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        // Comprobar si el personaje está en el suelo
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-
-        // Manejo del coyote time
-        if (isGrounded)
-        {
-            JumpDone = false;
-            anim.SetBool("Grounded", true);
-            coyoteTimeCounter = coyoteTime;
-        }
-        else
-        {
-            anim.SetBool("Grounded", false);
-            JumpDone = true;
-            coyoteTimeCounter -= Time.deltaTime;
-        }
-
-        // Manejo del input buffer
-        if (Input.GetButtonDown("Jump"))
-        {
-            jumpBufferCounter = jumpBufferTime;
-        }
-        else
-        {
-            jumpBufferCounter -= Time.deltaTime;
-        }
-
-        if (conoCollected && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.M)))
-        {
-            GameManager.gameManager.ChangeColor();
-        }
-
-        // Movimiento horizontal
         float moveInput = Input.GetAxis("Horizontal");
 
-        if (moveInput != 0)
+        if (!isDead)
         {
-            anim.SetBool("Walking", true);
+            isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+            // Manejo del coyote time
+            if (isGrounded)
+            {
+                JumpDone = false;
+                anim.SetBool("Grounded", true);
+                coyoteTimeCounter = coyoteTime;
+            }
+            else
+            {
+                anim.SetBool("Grounded", false);
+                JumpDone = true;
+                coyoteTimeCounter -= Time.deltaTime;
+            }
+
+            // Manejo del input buffer
+            if (Input.GetButtonDown("Jump"))
+            {
+                jumpBufferCounter = jumpBufferTime;
+            }
+            else
+            {
+                jumpBufferCounter -= Time.deltaTime;
+            }
+
+            if (conoCollected && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.M)))
+            {
+                GameManager.gameManager.ChangeColor();
+            }
+
+            // Movimiento horizontal
+            
+
+            if (moveInput != 0)
+            {
+                anim.SetBool("Walking", true);
+            }
+            else
+            {
+                anim.SetBool("Walking", false);
+            }
+
+            
+
+            // Verificar si puede saltar
+            if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && !JumpDone)
+            {
+                Jump();
+                jumpBufferCounter = 0f; // Reiniciar el buffer después de saltar
+            }
         }
         else
         {
-            anim.SetBool("Walking", false);
+            moveInput = 0;
         }
 
         rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
-
-        // Verificar si puede saltar
-        if (jumpBufferCounter > 0 && coyoteTimeCounter > 0 && !JumpDone)
-        {
-            Jump();
-            jumpBufferCounter = 0f; // Reiniciar el buffer después de saltar
-        }
     }
 
     private void Jump()
@@ -112,5 +130,41 @@ public class PlayerController : MonoBehaviour
             conoCollected = true;
             collision.gameObject.SetActive(false);
         }
+
+        if (collision.CompareTag("pinchos") || collision.CompareTag("Muerte"))
+        {
+            StartCoroutine(DeadAnim());
+        }
+    }
+
+    IEnumerator DeadAnim()
+    {
+        isDead = true;
+        rb.simulated = false;
+        anim.SetTrigger("dead");
+
+        rb.velocity = Vector2.zero;
+        GetComponent<BoxCollider2D>().enabled = false;
+
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        rb.simulated = true;
+        rb.velocity = new Vector2(rb.velocity.x, upwardForce);
+
+        yield return new WaitForSecondsRealtime(1f);
+
+        float fallDuration = 1.5f; // Tiempo que va a durar la caída
+        float timeElapsed = 0f;
+
+        while (timeElapsed < fallDuration)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, -fallSpeed);
+            timeElapsed += Time.deltaTime;
+            yield return null;  // Espera hasta el siguiente frame
+        }
+
+        GameManager.gameManager.LoadScene(0);
+        yield return new WaitForSecondsRealtime(2f);
+        GameManager.gameManager.normalView = false;
     }
 }
