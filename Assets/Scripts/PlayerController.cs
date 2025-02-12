@@ -33,7 +33,13 @@ public class PlayerController : MonoBehaviour
     public float upwardForce = 5f;
     public float fallSpeed = 5f;
 
-
+    [Header("Win")]
+    public Transform DoorTransform;
+    public float rotationSpeed = 100f; // Velocidad de rotación mientras el jugador gira
+    public float shrinkDuration = 2f;  // Tiempo en el que el jugador se hace más pequeño (y desaparece)
+    private bool isMoving = false;  // Para evitar que se mueva mientras gira
+    private bool isShrinking = false;  // Para saber si el jugador está reduciendo su tamaño
+    private float shrinkTime = 0f;
 
     private void Start()
     {
@@ -45,8 +51,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        float moveInput = Input.GetAxis("Horizontal");
-
         if (!isDead)
         {
             isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
@@ -81,9 +85,9 @@ public class PlayerController : MonoBehaviour
             }
 
             // Movimiento horizontal
-            
+            rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * moveSpeed, rb.velocity.y);
 
-            if (moveInput != 0)
+            if (rb.velocity.x != 0)
             {
                 anim.SetBool("Walking", true);
             }
@@ -101,12 +105,6 @@ public class PlayerController : MonoBehaviour
                 jumpBufferCounter = 0f; // Reiniciar el buffer después de saltar
             }
         }
-        else
-        {
-            moveInput = 0;
-        }
-
-        rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
     }
 
     private void Jump()
@@ -134,6 +132,11 @@ public class PlayerController : MonoBehaviour
         if (collision.CompareTag("pinchos") || collision.CompareTag("Muerte"))
         {
             StartCoroutine(DeadAnim());
+        }
+
+        if (collision.CompareTag("puerta"))
+        {
+            StartCoroutine(Win());
         }
     }
 
@@ -166,5 +169,42 @@ public class PlayerController : MonoBehaviour
         GameManager.gameManager.LoadScene(0);
         yield return new WaitForSecondsRealtime(2f);
         GameManager.gameManager.normalView = false;
+    }
+
+    IEnumerator Win()
+    {
+        rb.simulated = false;
+
+        while (Vector2.Distance(transform.position, DoorTransform.position) != 0f)
+        {
+            transform.position = Vector2.MoveTowards(transform.position, DoorTransform.position, (moveSpeed / 2) * Time.deltaTime);
+            yield return null;
+        }
+
+        float rotationTime = 2f;  // Tiempo de rotación (2 segundos)
+        float elapsedTime = 0f;
+
+        // El jugador empieza a girar mientras se reduce
+        while (elapsedTime < rotationTime)
+        {
+            // Rotar el jugador
+            transform.Rotate(Vector3.forward * rotationSpeed * Time.deltaTime);
+
+            // Reducir el tamaño del jugador mientras gira
+            float shrinkFactor = Mathf.Lerp(1f, 0f, elapsedTime / shrinkDuration); // Hacemos que se haga más pequeño con el tiempo
+            transform.localScale = new Vector3(shrinkFactor, shrinkFactor, shrinkFactor);
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // Aseguramos que al final el personaje esté completamente desaparecido
+        transform.localScale = new Vector3(0f, 0f, 0);
+
+        // Aquí puedes desactivar el jugador o realizar otras acciones si lo necesitas
+        gameObject.SetActive(false);  // Opcional: Desactivar el jugador
+
+        // Puedes agregar un tiempo antes de que el jugador reaparezca o se reinicie
+        yield return new WaitForSeconds(1f);
     }
 }

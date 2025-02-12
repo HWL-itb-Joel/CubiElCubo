@@ -2257,7 +2257,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   conoCollected: 0
-  moveSpeed: 13
+  moveSpeed: 12
   jumpForce: 17
   coyoteTime: 0.2
   jumpBufferTime: 0.2
