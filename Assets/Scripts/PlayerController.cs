@@ -219,7 +219,7 @@ public class PlayerController : MonoBehaviour
     IEnumerator DiableCollision()
     {
         collider.enabled = false;
-        yield return new WaitForSecondsRealtime(0.3f);
+        yield return new WaitForSecondsRealtime(0.23f);
         collider.enabled = true;
     }
 }

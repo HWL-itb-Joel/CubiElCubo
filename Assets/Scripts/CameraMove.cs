@@ -9,6 +9,7 @@ public class CameraMove : MonoBehaviour
     public Vector3 cameraPos1;
     public Vector3 cameraPos2;
     public Vector3 cameraPos3;
+    public Vector3 cameraPos4;
 
     private void Awake()
     {
@@ -18,17 +19,21 @@ public class CameraMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (player.transform.position.x < -26.5f)
+        if (player.transform.position.x < -26.65f)
         {
             transform.position = cameraPos1;
         }
-        else if (player.transform.position.x > -26.5f && player.transform.position.x < -9)
+        else if (player.transform.position.x > -26.65f && player.transform.position.x < -8.89)
         {
             transform.position = cameraPos2;
         }
-        else
+        else if (player.transform.position.x > -8.89 && player.transform.position.x < 8.89)
         {
             transform.position = cameraPos3;
+        }
+        else
+        {
+            transform.position = cameraPos4;
         }
     }
 }
