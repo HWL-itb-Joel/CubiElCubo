@@ -84,5 +84,6 @@ public class GameManager : MonoBehaviour
         transitionAnimator.SetTrigger("StartTransition");
         yield return new WaitForSecondsRealtime(transitionTime);
         SceneManager.LoadScene(sceneNumber);
+        normalView = false;
     }
 }

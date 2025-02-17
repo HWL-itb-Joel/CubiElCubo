@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class PlayerController : MonoBehaviour
 {
     public bool conoCollected;
+    BoxCollider2D collider;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -37,12 +38,10 @@ public class PlayerController : MonoBehaviour
     public Transform DoorTransform;
     public float rotationSpeed = 100f; // Velocidad de rotación mientras el jugador gira
     public float shrinkDuration = 2f;  // Tiempo en el que el jugador se hace más pequeño (y desaparece)
-    private bool isMoving = false;  // Para evitar que se mueva mientras gira
-    private bool isShrinking = false;  // Para saber si el jugador está reduciendo su tamaño
-    private float shrinkTime = 0f;
 
     private void Start()
     {
+        collider = GetComponent<BoxCollider2D>();
         isDead = false;
         conoCollected = false;
         rb = GetComponent<Rigidbody2D>();
@@ -69,14 +68,23 @@ public class PlayerController : MonoBehaviour
                 coyoteTimeCounter -= Time.deltaTime;
             }
 
-            // Manejo del input buffer
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
             {
-                jumpBufferCounter = jumpBufferTime;
+                if (Input.GetButtonDown("Jump"))
+                {
+                    StartCoroutine(DiableCollision());
+                }
             }
             else
             {
-                jumpBufferCounter -= Time.deltaTime;
+                if (Input.GetButtonDown("Jump"))
+                {
+                    jumpBufferCounter = jumpBufferTime;
+                }
+                else
+                {
+                    jumpBufferCounter -= Time.deltaTime;
+                }
             }
 
             if (conoCollected && (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.M)))
@@ -147,7 +155,7 @@ public class PlayerController : MonoBehaviour
         anim.SetTrigger("dead");
 
         rb.velocity = Vector2.zero;
-        GetComponent<BoxCollider2D>().enabled = false;
+        collider.enabled = false;
 
         yield return new WaitForSecondsRealtime(0.5f);
 
@@ -174,6 +182,7 @@ public class PlayerController : MonoBehaviour
     IEnumerator Win()
     {
         rb.simulated = false;
+        anim.enabled = false;
 
         while (Vector2.Distance(transform.position, DoorTransform.position) != 0f)
         {
@@ -187,24 +196,30 @@ public class PlayerController : MonoBehaviour
         // El jugador empieza a girar mientras se reduce
         while (elapsedTime < rotationTime)
         {
+            elapsedTime += Time.deltaTime;
+
             // Rotar el jugador
             transform.Rotate(Vector3.forward * rotationSpeed * Time.deltaTime);
 
-            // Reducir el tamaño del jugador mientras gira
-            float shrinkFactor = Mathf.Lerp(1f, 0f, elapsedTime / shrinkDuration); // Hacemos que se haga más pequeño con el tiempo
-            transform.localScale = new Vector3(shrinkFactor, shrinkFactor, shrinkFactor);
+            float shinkFactor = Mathf.Lerp(1, 0, elapsedTime / rotationTime);
+            transform.localScale = new Vector3(shinkFactor, shinkFactor, shinkFactor);
+            Debug.Log(transform.localScale);
 
-            elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        // Aseguramos que al final el personaje esté completamente desaparecido
-        transform.localScale = new Vector3(0f, 0f, 0);
-
+        GameManager.gameManager.LoadScene(0);
         // Aquí puedes desactivar el jugador o realizar otras acciones si lo necesitas
         gameObject.SetActive(false);  // Opcional: Desactivar el jugador
 
         // Puedes agregar un tiempo antes de que el jugador reaparezca o se reinicie
         yield return new WaitForSeconds(1f);
+    }
+
+    IEnumerator DiableCollision()
+    {
+        collider.enabled = false;
+        yield return new WaitForSecondsRealtime(0.3f);
+        collider.enabled = true;
     }
 }

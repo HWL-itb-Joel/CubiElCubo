@@ -8,6 +8,7 @@ TagManager:
   - pinchos
   - Muerte
   - puerta
+  - plataforma
   layers:
   - Default
   - TransparentFX
