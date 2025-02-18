@@ -28,6 +28,8 @@ public class PlayerController : MonoBehaviour
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
+    public LayerMask platformLayer;
+    bool isPlatformed;
 
     [Header("Dead")]
     public bool isDead = false;
@@ -53,6 +55,7 @@ public class PlayerController : MonoBehaviour
         if (!isDead)
         {
             isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+            isPlatformed = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, platformLayer);
 
             // Manejo del coyote time
             if (isGrounded)
@@ -68,7 +71,7 @@ public class PlayerController : MonoBehaviour
                 coyoteTimeCounter -= Time.deltaTime;
             }
 
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+            if ((Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) && isPlatformed)
             {
                 if (Input.GetButtonDown("Jump"))
                 {
@@ -126,6 +129,23 @@ public class PlayerController : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        if (collision.gameObject.CompareTag("plataforma")&& isGrounded)
+        {
+            transform.parent = collision.gameObject.transform;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("plataforma"))
+        {
+            transform.parent = null;
         }
     }
 
